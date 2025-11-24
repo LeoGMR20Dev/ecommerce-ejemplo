@@ -1,7 +1,11 @@
 class MockProductRepository {
     // ¡Implementa la interfaz!
     constructor() {
-        this.products = [];
+        this.products = [
+            "este es un producto",
+            "este es otro producto",
+            "tenemos mas productos",
+        ];
     }
     async getAll() {
         return this.products;
