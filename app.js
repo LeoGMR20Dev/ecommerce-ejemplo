@@ -1,7 +1,13 @@
 require("dotenv").config();
 const express = require("express");
 const morgan = require("morgan");
+const {
+    connectDB,
+} = require("./src/infrastructure/repositories/database/mongo/config");
 const app = express();
+
+//Connect to database
+connectDB();
 
 // Middlewares
 app.use(morgan("dev"));
