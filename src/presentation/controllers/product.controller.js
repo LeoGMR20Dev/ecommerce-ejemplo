@@ -11,13 +11,14 @@ class ProductController {
   };
 
   getById = async (req, res) => {
-    const product = await this.productService.getProductById(req.params.id);
+    const { id } = req.params;
+    const product = await this.productService.getProductById(id);
 
-    if (!product) {
-      return res.status(404).json({ message: "Producto no encontrado" });
+    if (product) {
+      res.status(200).json(product);
+    } else {
+      res.status(404).json({ message: "Product not found" });
     }
-
-    res.status(200).json(product);
   };
 
   create = async (req, res) => {
@@ -26,26 +27,19 @@ class ProductController {
   };
 
   update = async (req, res) => {
-    const product = await this.productService.updateProduct(
-      req.params.id,
-      req.body
-    );
-
-    if (!product) {
-      return res.status(404).json({ message: "Producto no encontrado" });
+    const { id } = req.params;
+    const product = await this.productService.updateProduct(id, req.body);
+    if (product) {
+      res.status(200).json(product);
+    } else {
+      res.status(404).json({ message: "Product not found" });
     }
-
-    res.status(200).json(product);
   };
 
   delete = async (req, res) => {
-    const product = await this.productService.deleteProduct(req.params.id);
-
-    if (!product) {
-      return res.status(404).json({ message: "Producto no encontrado" });
-    }
-
-    return res.sendStatus(204);
+    const { id } = req.params;
+    await this.productService.deleteProduct(id);
+    res.status(204).send();
   };
 }
 module.exports = ProductController;
