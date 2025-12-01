@@ -19,8 +19,12 @@ class OrderMongoRepository extends OrderRepository {
     );
   }
 
-  async getById(id) {
-    const order = await OrderModel.findById(id);
+  async getById(id, session = null) {
+    const order = await OrderModel.findById(
+      id,
+      null,
+      session ? { session } : undefined
+    );
 
     if (!order) return null;
 
@@ -35,7 +39,7 @@ class OrderMongoRepository extends OrderRepository {
     );
   }
 
-  async create(orderEntity) {
+  async create(orderEntity, session = null) {
     const newOrder = new OrderModel({
       product: orderEntity.product,
       description: orderEntity.description,
@@ -45,7 +49,9 @@ class OrderMongoRepository extends OrderRepository {
       total: orderEntity.total,
     });
 
-    const savedOrder = await newOrder.save();
+    const savedOrder = session
+      ? await newOrder.save({ session })
+      : await newOrder.save();
 
     return new Order(
       savedOrder._id.toString(),
@@ -58,22 +64,27 @@ class OrderMongoRepository extends OrderRepository {
     );
   }
 
-  async update(id, orderEntity) {
+  async update(id, orderEntity, session = null) {
+    const dataToUpdate = {
+      product: orderEntity.product,
+      description: orderEntity.description,
+      quantity: orderEntity.quantity,
+      price: orderEntity.price,
+      discount: orderEntity.discount,
+      total: orderEntity.total,
+    };
+
+    const options = { new: true };
+    if (session) options.session = session;
+
     const updatedOrder = await OrderModel.findByIdAndUpdate(
       id,
-      {
-        product: orderEntity.product,
-        description: orderEntity.description,
-        quantity: orderEntity.quantity,
-        price: orderEntity.price,
-        discount: orderEntity.discount,
-        total: orderEntity.total,
-      },
-      { new: true }
+      dataToUpdate,
+      options
     );
 
-      if (!updatedOrder) return null;
-      
+    if (!updatedOrder) return null;
+
     return new Order(
       updatedOrder._id.toString(),
       updatedOrder.product,

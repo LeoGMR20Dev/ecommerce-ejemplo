@@ -5,9 +5,10 @@ const {
 } = require("../../domain/errors/custom-error");
 
 class OrderService {
-  constructor(orderRepository, productRepository) {
+  constructor(orderRepository, productRepository, transactionRepository) {
     this.orderRepository = orderRepository;
     this.productRepository = productRepository;
+    this.transactionRepository = transactionRepository;
   }
 
   async getAllOrders() {
@@ -25,111 +26,158 @@ class OrderService {
   }
 
   async createOrder(orderData) {
-    //Get the product that will be related to the order
+    await this.transactionRepository.beginTransaction();
 
-    const product = await this.productRepository.getById(orderData.product);
+    try {
+      const session = await this.transactionRepository.getSession();
 
-    if (!product) {
-      throw new NotFoundError("Producto no encontrado");
+      //Get the product that will be related to the order
+
+      const product = await this.productRepository.getById(
+        orderData.product,
+        session
+      );
+
+      if (!product) {
+        throw new NotFoundError("Producto no encontrado");
+      }
+
+      //Validate the quantity of the order. It has to be less or equal than
+      //the actual stock
+
+      if (product.stock < orderData.quantity || orderData.quantity <= 0) {
+        throw new ValidationError("Cantidad ingresada no válida");
+      }
+
+      //Get and validate the discount for the product
+
+      const totalWithoutDiscount = orderData.quantity * product.price;
+
+      if (orderData.discount > totalWithoutDiscount || orderData.discount < 0) {
+        throw new ValidationError("Monto de descuento ingresado no válido");
+      }
+
+      //Update the product data and create the order
+
+      const updatedProduct = await this.productRepository.update(
+        product.id,
+        {
+          ...product,
+          stock: product.stock - orderData.quantity,
+        },
+        session
+      );
+
+      if (!updatedProduct) {
+        throw new NotFoundError("Producto no encontrado");
+      }
+
+      const total = totalWithoutDiscount - orderData.discount;
+
+      const orderEntity = new Order(
+        null,
+        product.id.toString(),
+        orderData.description,
+        orderData.quantity,
+        product.price,
+        orderData.discount,
+        total
+      );
+      const order = await this.orderRepository.create(orderEntity, session);
+
+      await this.transactionRepository.commitTransaction();
+
+      return order;
+    } catch (error) {
+      await this.transactionRepository.rollbackTransaction();
+      throw error;
+    } finally {
+      await this.transactionRepository.dispose();
     }
-
-    //Validate the quantity of the order. It has to be less or equal than
-    //the actual stock
-
-    if (product.stock < orderData.quantity || orderData.quantity <= 0) {
-      throw new ValidationError("Cantidad ingresada no válida");
-    }
-
-    //Get and validate the discount for the product
-
-    const totalWithoutDiscount = orderData.quantity * product.price;
-
-    if (orderData.discount > totalWithoutDiscount || orderData.discount < 0) {
-      throw new ValidationError("Monto de descuento ingresado no válido");
-    }
-
-    //Update the product data and create the order
-
-    const updatedProduct = await this.productRepository.update(product.id, {
-      ...product,
-      stock: product.stock - orderData.quantity,
-    });
-
-    if (!updatedProduct) {
-      throw new NotFoundError("Producto no encontrado");
-    }
-
-    const total = totalWithoutDiscount - orderData.discount;
-
-    const orderEntity = new Order(
-      null,
-      product.id.toString(),
-      orderData.description,
-      orderData.quantity,
-      product.price,
-      orderData.discount,
-      total
-    );
-
-    return this.orderRepository.create(orderEntity);
   }
 
   async updateOrder(id, orderData) {
-    //Get the order and the product data
+    await this.transactionRepository.beginTransaction();
 
-    const order = await this.orderRepository.getById(id);
+    try {
+      const session = await this.transactionRepository.getSession();
 
-    if (!order) {
-      throw new NotFoundError("Orden no encontradas");
+      //Get the order and the product data
+
+      const order = await this.orderRepository.getById(id, session);
+
+      if (!order) {
+        throw new NotFoundError("Orden no encontradas");
+      }
+
+      const product = await this.productRepository.getById(
+        order.product,
+        session
+      );
+
+      if (!product) {
+        throw new NotFoundError("Producto no encontrado");
+      }
+
+      //Validate the quantity to update with the previous stock
+
+      const stockDifference = order.quantity - orderData.quantity;
+      const updatedStock = product.stock + stockDifference;
+
+      if (orderData.quantity <= 0 || updatedStock < 0) {
+        throw new ValidationError("Cantidad ingresada no válida");
+      }
+
+      //Get and validate the discount for the product
+
+      const totalWithoutDiscount = orderData.quantity * product.price;
+
+      if (orderData.discount > totalWithoutDiscount || orderData.discount < 0) {
+        throw new ValidationError("Monto de descuento ingresado no válido");
+      }
+
+      //Update the product and the order data
+
+      const updatedProduct = await this.productRepository.update(
+        product.id,
+        {
+          ...product,
+          stock: updatedStock,
+        },
+        session
+      );
+
+      if (!updatedProduct) {
+        throw new NotFoundError("Producto no encontrado");
+      }
+
+      const total = totalWithoutDiscount - orderData.discount;
+
+      const orderEntity = new Order(
+        id,
+        product.id.toString(),
+        orderData.description,
+        orderData.quantity,
+        product.price,
+        orderData.discount,
+        total
+      );
+
+      const updatedOrder = await this.orderRepository.update(
+        id,
+        orderEntity,
+        session
+      );
+
+      await this.transactionRepository.commitTransaction();
+
+      return updatedOrder;
+    } catch (error) {
+      await this.transactionRepository.rollbackTransaction();
+      throw error;
+    } finally {
+      await this.transactionRepository.dispose();
     }
-
-    const product = await this.productRepository.getById(order.product);
-
-    if (!product) {
-      throw new NotFoundError("Producto no encontrado");
-    }
-
-    //Validate the quantity to update with the previous stock
-
-    const stockDifference = order.quantity - orderData.quantity;
-    const updatedStock = product.stock + stockDifference;
-
-    if (orderData.quantity <= 0 || updatedStock < 0) {
-      throw new ValidationError("Cantidad ingresada no válida");
-    }
-
-    //Get and validate the discount for the product
-
-    const totalWithoutDiscount = orderData.quantity * product.price;
-
-    if (orderData.discount > totalWithoutDiscount || orderData.discount < 0) {
-      throw new ValidationError("Monto de descuento ingresado no válido");
-    }
-
-    //Update the product and the order data
-
-    const updatedProduct = await this.productRepository.update(product.id, {
-      ...product,
-      stock: updatedStock,
-    });
-
-    if (!updatedProduct) {
-      throw new NotFoundError("Producto no encontrado");
-    }
-
-    const total = totalWithoutDiscount - orderData.discount;
-
-    const orderEntity = new Order(
-      id,
-      product.id.toString(),
-      orderData.description,
-      orderData.quantity,
-      product.price,
-      orderData.discount,
-      total
-    );
-
-    return this.orderRepository.update(id, orderEntity);
   }
 
   async deleteOrder(id) {
