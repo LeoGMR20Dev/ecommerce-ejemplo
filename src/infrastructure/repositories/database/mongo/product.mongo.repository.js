@@ -81,7 +81,7 @@ class ProductMongoRepository extends ProductRepository {
   }
 
   async delete(id) {
-    await ProductModel.findByIdAndDelete(id);
+    return await ProductModel.findByIdAndDelete(id);
   }
 }
 

@@ -4,42 +4,55 @@ class ProductController {
     this.productService = productService;
   }
 
-  getAll = async (_, res) => {
+  getAll = async (_, res, next) => {
     // Usamos arrow fn para no perder el 'this'
-    const products = await this.productService.getAllProducts();
-    res.status(200).json(products);
-  };
-
-  getById = async (req, res) => {
-    const { id } = req.params;
-    const product = await this.productService.getProductById(id);
-
-    if (product) {
-      res.status(200).json(product);
-    } else {
-      res.status(404).json({ message: "Product not found" });
+    try {
+      const products = await this.productService.getAllProducts();
+      res.status(200).json(products);
+    } catch (error) {
+      next(error);
     }
   };
 
-  create = async (req, res) => {
-    const product = await this.productService.createProduct(req.body);
-    res.status(201).json(product); // 201 Created!
-  };
-
-  update = async (req, res) => {
+  getById = async (req, res, next) => {
     const { id } = req.params;
-    const product = await this.productService.updateProduct(id, req.body);
-    if (product) {
+    try {
+      const product = await this.productService.getProductById(id);
       res.status(200).json(product);
-    } else {
-      res.status(404).json({ message: "Product not found" });
+    } catch (error) {
+      next(error);
     }
   };
 
-  delete = async (req, res) => {
+  create = async (req, res, next) => {
+    try {
+      const product = await this.productService.createProduct(req.body);
+      res.status(201).json(product); // 201 Created!
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  update = async (req, res, next) => {
     const { id } = req.params;
-    await this.productService.deleteProduct(id);
-    res.status(204).send();
+
+    try {
+      const product = await this.productService.updateProduct(id, req.body);
+      res.status(200).json(product);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  delete = async (req, res, next) => {
+    const { id } = req.params;
+
+    try {
+      await this.productService.deleteProduct(id);
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
   };
 }
 module.exports = ProductController;

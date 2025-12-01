@@ -1,4 +1,8 @@
 const Order = require("../../domain/entities/order.entity");
+const {
+  NotFoundError,
+  ValidationError,
+} = require("../../domain/errors/custom-error");
 
 class OrderService {
   constructor(orderRepository, productRepository) {
@@ -11,33 +15,51 @@ class OrderService {
   }
 
   async getOrderById(id) {
-    return this.orderRepository.getById(id);
+    const order = await this.orderRepository.getById(id);
+
+    if (!order) {
+      throw new NotFoundError("Orden no encontrada");
+    }
+
+    return order;
   }
 
   async createOrder(orderData) {
+    //Get the product that will be related to the order
+
     const product = await this.productRepository.getById(orderData.product);
 
-    if (!product) return null;
+    if (!product) {
+      throw new NotFoundError("Producto no encontrado");
+    }
 
-    if (product.stock < orderData.quantity || orderData.quantity <= 0)
-      return null;
+    //Validate the quantity of the order. It has to be less or equal than
+    //the actual stock
+
+    if (product.stock < orderData.quantity || orderData.quantity <= 0) {
+      throw new ValidationError("Cantidad ingresada no válida");
+    }
+
+    //Get and validate the discount for the product
 
     const totalWithoutDiscount = orderData.quantity * product.price;
 
     if (orderData.discount > totalWithoutDiscount || orderData.discount < 0) {
-      return null;
+      throw new ValidationError("Monto de descuento ingresado no válido");
     }
-    console.log("dsadas");
+
+    //Update the product data and create the order
+
     const updatedProduct = await this.productRepository.update(product.id, {
       ...product,
       stock: product.stock - orderData.quantity,
     });
-    console.log("dsadas2");
 
-    if (!updatedProduct) return null;
+    if (!updatedProduct) {
+      throw new NotFoundError("Producto no encontrado");
+    }
 
     const total = totalWithoutDiscount - orderData.discount;
-    console.log("dsadas3", product);
 
     const orderEntity = new Order(
       null,
@@ -48,37 +70,52 @@ class OrderService {
       orderData.discount,
       total
     );
-    console.log("dsadas4");
 
     return this.orderRepository.create(orderEntity);
   }
 
   async updateOrder(id, orderData) {
+    //Get the order and the product data
+
     const order = await this.orderRepository.getById(id);
 
-    if (!order) return null;
+    if (!order) {
+      throw new NotFoundError("Orden no encontradas");
+    }
 
     const product = await this.productRepository.getById(order.product);
 
-    if (!product) return null;
+    if (!product) {
+      throw new NotFoundError("Producto no encontrado");
+    }
 
-    const stockDifference = order.quantity - orderData.quantity; //10 - 21 = -11
+    //Validate the quantity to update with the previous stock
+
+    const stockDifference = order.quantity - orderData.quantity;
     const updatedStock = product.stock + stockDifference;
 
-    if (orderData.quantity <= 0 || updatedStock < 0) return null;
+    if (orderData.quantity <= 0 || updatedStock < 0) {
+      throw new ValidationError("Cantidad ingresada no válida");
+    }
+
+    //Get and validate the discount for the product
 
     const totalWithoutDiscount = orderData.quantity * product.price;
 
     if (orderData.discount > totalWithoutDiscount || orderData.discount < 0) {
-      return null;
+      throw new ValidationError("Monto de descuento ingresado no válido");
     }
+
+    //Update the product and the order data
 
     const updatedProduct = await this.productRepository.update(product.id, {
       ...product,
       stock: updatedStock,
     });
 
-    if (!updatedProduct) return null;
+    if (!updatedProduct) {
+      throw new NotFoundError("Producto no encontrado");
+    }
 
     const total = totalWithoutDiscount - orderData.discount;
 
@@ -96,7 +133,13 @@ class OrderService {
   }
 
   async deleteOrder(id) {
-    return this.orderRepository.delete(id);
+    const deletedOrder = await this.orderRepository.delete(id);
+
+    if (!deletedOrder) {
+      throw new NotFoundError("Orden no encontrada");
+    }
+
+    return;
   }
 }
 

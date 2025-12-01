@@ -25,5 +25,8 @@ app.get("/api/v1/healthcheck", (req, res) => {
   res.status(200).json({ status: "ok", timestamp: new Date() });
 });
 
+const errorHandler = require("./src/infrastructure/middlewares/error-handler");
+app.use(errorHandler);
+
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log(`Servidor corriendo en puerto ${PORT}`));
