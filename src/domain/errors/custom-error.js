@@ -18,4 +18,10 @@ class NotFoundError extends CustomError {
   }
 }
 
-module.exports = { CustomError, ValidationError, NotFoundError };
+class ConflictError extends CustomError {
+  constructor(message = "Resource already exists") {
+    super(message, 409);
+  }
+}
+
+module.exports = { CustomError, ValidationError, NotFoundError, ConflictError };

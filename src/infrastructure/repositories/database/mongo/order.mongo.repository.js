@@ -97,7 +97,7 @@ class OrderMongoRepository extends OrderRepository {
   }
 
   async delete(id) {
-    return await OrderModel.findByIdAndDelete(id);
+    return OrderModel.findByIdAndDelete(id);
   }
 }
 

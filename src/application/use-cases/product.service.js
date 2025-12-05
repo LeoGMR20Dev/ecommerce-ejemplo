@@ -12,9 +12,9 @@ class ProductService {
 
   async getProductById(id) {
     const product = await this.productRepository.getById(id);
-    
+
     if (!product) {
-      throw new NotFoundError("Producto no encontrado");
+      throw new NotFoundError("Product not found");
     }
 
     return product;
@@ -45,10 +45,13 @@ class ProductService {
       productData.imageUrl
     );
 
-    const updatedProduct = await this.productRepository.update(id, productEntity);
+    const updatedProduct = await this.productRepository.update(
+      id,
+      productEntity
+    );
 
     if (!updatedProduct) {
-      throw new NotFoundError("Producto no encontrado");
+      throw new NotFoundError("Product not found");
     }
 
     return updatedProduct;
@@ -58,7 +61,7 @@ class ProductService {
     const deletedProduct = await this.productRepository.delete(id);
 
     if (!deletedProduct) {
-      throw new NotFoundError("Producto no encontrado");
+      throw new NotFoundError("Product not found");
     }
 
     return;

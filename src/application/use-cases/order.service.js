@@ -107,7 +107,7 @@ class OrderService {
       const order = await this.orderRepository.getById(id, session);
 
       if (!order) {
-        throw new NotFoundError("Orden no encontradas");
+        throw new NotFoundError("Order not found");
       }
 
       const product = await this.productRepository.getById(
@@ -116,7 +116,7 @@ class OrderService {
       );
 
       if (!product) {
-        throw new NotFoundError("Producto no encontrado");
+        throw new NotFoundError("Product not found");
       }
 
       //Validate the quantity to update with the previous stock
@@ -125,7 +125,7 @@ class OrderService {
       const updatedStock = product.stock + stockDifference;
 
       if (orderData.quantity <= 0 || updatedStock < 0) {
-        throw new ValidationError("Cantidad ingresada no válida");
+        throw new ValidationError("Entered quantity is not valid");
       }
 
       //Get and validate the discount for the product
@@ -133,7 +133,7 @@ class OrderService {
       const totalWithoutDiscount = orderData.quantity * product.price;
 
       if (orderData.discount > totalWithoutDiscount || orderData.discount < 0) {
-        throw new ValidationError("Monto de descuento ingresado no válido");
+        throw new ValidationError("Entered discount is not valid");
       }
 
       //Update the product and the order data
@@ -148,7 +148,7 @@ class OrderService {
       );
 
       if (!updatedProduct) {
-        throw new NotFoundError("Producto no encontrado");
+        throw new NotFoundError("Product not found");
       }
 
       const total = totalWithoutDiscount - orderData.discount;
@@ -184,7 +184,7 @@ class OrderService {
     const deletedOrder = await this.orderRepository.delete(id);
 
     if (!deletedOrder) {
-      throw new NotFoundError("Orden no encontrada");
+      throw new NotFoundError("Order not found");
     }
 
     return;
