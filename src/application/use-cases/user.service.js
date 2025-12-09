@@ -62,7 +62,13 @@ class UserService {
       roleIds // Can be undefined
     );
 
-    return this.userRepository.update(id, userEntity);
+    const updatedUser = await this.userRepository.update(id, userEntity);
+
+    if (!updatedUser) {
+      throw new NotFoundError("User not found");
+    }
+
+    return updatedUser;
   }
 
   async deleteUser(id) {

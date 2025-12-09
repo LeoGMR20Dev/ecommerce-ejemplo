@@ -11,11 +11,20 @@ const userService = new UserService(userRepository, roleRepository);
 const userController = new UserController(userService);
 
 const router = Router();
+
+/**
+ * @swagger
+ * tags:
+ *   name: Users
+ *   description: The users CRUD endpoints
+ */
+
 /**
  * @swagger
  * /users:
  *   get:
  *     summary: Retrieve a list of users
+ *     tags: [Users]
  *     responses:
  *       200:
  *         description: A list of users.
@@ -28,11 +37,13 @@ const router = Router();
  */
 
 router.get('/', asyncHandler(userController.getAll));
+
 /**
  * @swagger
  * /users/{id}:
  *   get:
  *     summary: Retrieve a single user by ID
+ *     tags: [Users]
  *     parameters:
  *       - in: path
  *         name: id
@@ -51,11 +62,13 @@ router.get('/', asyncHandler(userController.getAll));
  */
 
 router.get('/:id', asyncHandler(userController.getById));
+
 /**
  * @swagger
  * /users:
  *   post:
  *     summary: Create a new user
+ *     tags: [Users]
  *     requestBody:
  *       required: true
  *       content:
@@ -81,6 +94,7 @@ router.post('/', asyncHandler(userController.create));
  * /users/{id}:
  *   put:
  *     summary: Update a user
+ *     tags: [Users]
  *     parameters:
  *       - in: path
  *         name: id
@@ -110,6 +124,7 @@ router.put('/:id', asyncHandler(userController.update));
  * /users/{id}:
  *   delete:
  *     summary: Delete a user
+ *     tags: [Users]
  *     parameters:
  *       - in: path
  *         name: id

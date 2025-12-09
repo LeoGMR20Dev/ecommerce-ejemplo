@@ -81,7 +81,7 @@ class UserMongoRepository extends UserRepository {
   }
 
   async delete(id) {
-    await UserModel.findByIdAndDelete(id);
+    return UserModel.findByIdAndDelete(id);
   }
 }
 
