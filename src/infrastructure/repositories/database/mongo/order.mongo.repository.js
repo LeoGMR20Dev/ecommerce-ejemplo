@@ -14,6 +14,7 @@ class OrderMongoRepository extends OrderRepository {
           p.quantity,
           p.price,
           p.discount,
+          p.cupon,
           p.total
         )
     );
@@ -35,6 +36,7 @@ class OrderMongoRepository extends OrderRepository {
       order.quantity,
       order.price,
       order.discount,
+      order.cupon,
       order.total
     );
   }
@@ -46,6 +48,7 @@ class OrderMongoRepository extends OrderRepository {
       quantity: orderEntity.quantity,
       price: orderEntity.price,
       discount: orderEntity.discount,
+      cupon: orderEntity.cupon,
       total: orderEntity.total,
     });
 
@@ -60,6 +63,7 @@ class OrderMongoRepository extends OrderRepository {
       savedOrder.quantity,
       savedOrder.price,
       savedOrder.discount,
+      savedOrder.cupon,
       savedOrder.total
     );
   }
@@ -71,6 +75,7 @@ class OrderMongoRepository extends OrderRepository {
       quantity: orderEntity.quantity,
       price: orderEntity.price,
       discount: orderEntity.discount,
+      cupon: orderEntity.cupon,
       total: orderEntity.total,
     };
 
@@ -92,6 +97,7 @@ class OrderMongoRepository extends OrderRepository {
       updatedOrder.quantity,
       updatedOrder.price,
       updatedOrder.discount,
+      updatedOrder.cupon,
       updatedOrder.total
     );
   }

@@ -192,6 +192,10 @@ const swaggerDefinition = {
             type: "number",
             example: 15.99,
           },
+          cupon: {
+            type: "string",
+            example: "60c72b2f9b1e8a001f8e4cff",
+          },
           total: {
             type: "number",
             example: 34.0,
@@ -214,9 +218,9 @@ const swaggerDefinition = {
             type: "number",
             example: 1,
           },
-          discount: {
-            type: "number",
-            example: 15.99,
+          cupon: {
+            type: "string",
+            example: "60c72b2f9b1e8a001f8e4cff",
           },
         },
       },

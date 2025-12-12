@@ -5,10 +5,16 @@ const {
 } = require("../../domain/errors/custom-error");
 
 class OrderService {
-  constructor(orderRepository, productRepository, transactionRepository) {
+  constructor(
+    orderRepository,
+    productRepository,
+    transactionRepository,
+    cuponRepository
+  ) {
     this.orderRepository = orderRepository;
     this.productRepository = productRepository;
     this.transactionRepository = transactionRepository;
+    this.cuponRepository = cuponRepository;
   }
 
   async getAllOrders() {
@@ -49,13 +55,30 @@ class OrderService {
         throw new ValidationError("Entered quantity not valid");
       }
 
+      //Get cupon data
+
+      const cupon = await this.cuponRepository.getById(
+        orderData.cupon,
+        session
+      );
+
+      if (!cupon) {
+        throw new NotFoundError("Cupon not found");
+      }
+
       //Get and validate the discount for the product
 
       const totalWithoutDiscount = orderData.quantity * product.price;
 
-      if (orderData.discount > totalWithoutDiscount || orderData.discount < 0) {
-        throw new ValidationError("Entered discount amount not valid");
+      if (totalWithoutDiscount < cupon.minimumPriceToApply) {
+        throw new ValidationError(
+          "The total has to be higher or equal than minimum to apply the cupon"
+        );
       }
+
+      const discountAmount = cupon.isPercentage
+        ? totalWithoutDiscount * (cupon.amount / 100)
+        : totalWithoutDiscount - cupon.amount;
 
       //Update the product data and create the order
 
@@ -72,7 +95,7 @@ class OrderService {
         throw new NotFoundError("Product not found");
       }
 
-      const total = totalWithoutDiscount - orderData.discount;
+      const total = totalWithoutDiscount - discountAmount;
 
       const orderEntity = new Order(
         null,
@@ -80,9 +103,11 @@ class OrderService {
         orderData.description,
         orderData.quantity,
         product.price,
-        orderData.discount,
+        discountAmount,
+        cupon.id,
         total
       );
+
       const order = await this.orderRepository.create(orderEntity, session);
 
       await this.transactionRepository.commitTransaction();
@@ -128,13 +153,30 @@ class OrderService {
         throw new ValidationError("Entered quantity is not valid");
       }
 
+      //Get cupon data
+
+      const cupon = await this.cuponRepository.getById(
+        orderData.cupon,
+        session
+      );
+
+      if (!cupon) {
+        throw new NotFoundError("Cupon not found");
+      }
+
       //Get and validate the discount for the product
 
       const totalWithoutDiscount = orderData.quantity * product.price;
-
-      if (orderData.discount > totalWithoutDiscount || orderData.discount < 0) {
-        throw new ValidationError("Entered discount is not valid");
+      
+      if (totalWithoutDiscount < cupon.minimunToApply) {
+        throw new ValidationError(
+          "The total has to be higher or equal than minimum to apply the cupon"
+        );
       }
+
+      const discountAmount = cupon.isPercentage
+        ? totalWithoutDiscount * (cupon.amount / 100)
+        : totalWithoutDiscount - cupon.amount;
 
       //Update the product and the order data
 
@@ -151,7 +193,7 @@ class OrderService {
         throw new NotFoundError("Product not found");
       }
 
-      const total = totalWithoutDiscount - orderData.discount;
+      const total = totalWithoutDiscount - discountAmount;
 
       const orderEntity = new Order(
         id,
@@ -159,7 +201,8 @@ class OrderService {
         orderData.description,
         orderData.quantity,
         product.price,
-        orderData.discount,
+        discountAmount,
+        cupon.id,
         total
       );
 
