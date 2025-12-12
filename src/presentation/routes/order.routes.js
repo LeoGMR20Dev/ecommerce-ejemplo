@@ -7,14 +7,17 @@ const authenticateToken = require("../middlewares/auth.middleware");
 const OrderMongoRepository = require("../../infrastructure/repositories/database/mongo/order.mongo.repository");
 const ProductMongoRepository = require("../../infrastructure/repositories/database/mongo/product.mongo.repository");
 const TransactionMongoRepository = require("../../infrastructure/repositories/database/mongo/transaction.mongo.repository");
+const CuponMongoRepository = require("../../infrastructure/repositories/database/mongo/cupon.mongo.repository");
 const orderRepository = new OrderMongoRepository();
 const productRepository = new ProductMongoRepository();
 const transactionRepository = new TransactionMongoRepository();
+const cuponRepository = new CuponMongoRepository();
 
 const orderService = new OrderService(
   orderRepository,
   productRepository,
-  transactionRepository
+  transactionRepository,
+  cuponRepository
 );
 const orderController = new OrderController(orderService);
 

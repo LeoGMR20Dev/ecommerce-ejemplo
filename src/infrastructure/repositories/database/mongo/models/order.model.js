@@ -31,6 +31,11 @@ const orderSchema = mongoose.Schema(
       required: true,
       min: 0,
     },
+    cupon: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Cupon",
+      required: true,
+    },
   },
   { timestamps: true }
 );
