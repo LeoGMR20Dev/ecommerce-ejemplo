@@ -34,7 +34,7 @@ const orderSchema = mongoose.Schema(
     cupon: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Cupon",
-      required: true,
+      required: false,
     },
   },
   { timestamps: true }
