@@ -14,7 +14,8 @@ class ProductMongoRepository extends ProductRepository {
           p.price,
           p.stock,
           p.category,
-          p.imageUrl
+          p.imageUrl,
+          p.brand ?? null
         )
     );
   }
@@ -29,7 +30,8 @@ class ProductMongoRepository extends ProductRepository {
       product.price,
       product.stock,
       product.category,
-      product.imageUrl
+      product.imageUrl,
+      product.brand ?? null
     );
   }
 
@@ -41,6 +43,7 @@ class ProductMongoRepository extends ProductRepository {
       stock: productEntity.stock,
       category: productEntity.category,
       imageUrl: productEntity.imageUrl,
+      brand: productEntity.brand,
     });
     const savedProduct = await newProduct.save();
     return new Product(
@@ -50,7 +53,8 @@ class ProductMongoRepository extends ProductRepository {
       savedProduct.price,
       savedProduct.stock,
       savedProduct.category,
-      savedProduct.imageUrl
+      savedProduct.imageUrl,
+      savedProduct.brand ?? null
     );
   }
 
@@ -64,6 +68,7 @@ class ProductMongoRepository extends ProductRepository {
         stock: productEntity.stock,
         category: productEntity.category,
         imageUrl: productEntity.imageUrl,
+        brand: productEntity.brand,
       },
       { new: true }
     );
@@ -76,7 +81,8 @@ class ProductMongoRepository extends ProductRepository {
       updatedProduct.price,
       updatedProduct.stock,
       updatedProduct.category,
-      updatedProduct.imageUrl
+      updatedProduct.imageUrl,
+      updatedProduct.brand ?? null
     );
   }
 
