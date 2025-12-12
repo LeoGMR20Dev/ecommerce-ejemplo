@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const morgan = require("morgan");
+const cors = require("cors");
 const {
   connectDB,
 } = require("./src/infrastructure/repositories/database/mongo/config");
@@ -12,6 +13,11 @@ connectDB();
 // Middlewares
 app.use(morgan("dev"));
 app.use(express.json());
+
+app.use(cors({
+  origin: ["http://127.0.0.1:8000", "http://localhost:8000"],
+  credentials: true,
+}));
 
 const productRoutes = require("./src/presentation/routes/product.routes");
 const orderRoutes = require("./src/presentation/routes/order.routes");
