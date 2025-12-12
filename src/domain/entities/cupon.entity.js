@@ -1,4 +1,4 @@
-class CuponEntity {
+class Cupon {
   constructor(id, name, amount, isPercentage, minimumPriceToApply) {
     this.id = id;
     this.name = name;
@@ -7,3 +7,5 @@ class CuponEntity {
     this.minimumPriceToApply = minimumPriceToApply;
   }
 }
+
+module.exports = Cupon;

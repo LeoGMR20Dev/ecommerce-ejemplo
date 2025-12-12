@@ -163,6 +163,8 @@ const swaggerDefinition = {
         },
       },
 
+      /* Orders */
+
       Order: {
         type: "object",
         properties: {
@@ -196,6 +198,7 @@ const swaggerDefinition = {
           },
         },
       },
+
       OrderInput: {
         type: "object",
         properties: {
@@ -214,6 +217,56 @@ const swaggerDefinition = {
           discount: {
             type: "number",
             example: 15.99,
+          },
+        },
+      },
+
+      /* Cupons */
+
+      Cupon: {
+        type: "object",
+        properties: {
+          id: {
+            type: "string",
+            example: "60c72b2f9b1e8a001f8e4caf",
+          },
+          name: {
+            type: "string",
+            example: "Cupon 15% OFF",
+          },
+          amount: {
+            type: "number",
+            example: 15,
+          },
+          isPercentage: {
+            type: "boolean",
+            example: true,
+          },
+          minimumPriceToApply: {
+            type: "number",
+            example: 50,
+          },
+        },
+      },
+
+      CuponInput: {
+        type: "object",
+        properties: {
+          name: {
+            type: "string",
+            example: "Cupon 15% OFF",
+          },
+          amount: {
+            type: "number",
+            example: 15,
+          },
+          isPercentage: {
+            type: "boolean",
+            example: true,
+          },
+          minimumPriceToApply: {
+            type: "number",
+            example: 50,
           },
         },
       },
