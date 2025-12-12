@@ -2,6 +2,8 @@ const { Router } = require('express');
 const RoleController = require('../controllers/role.controller');
 const RoleService = require('../../application/use-cases/role.service');
 const RoleMongoRepository = require('../../infrastructure/repositories/database/mongo/role.mongo.repository');
+const authenticateToken = require("../middlewares/auth.middleware");
+const isAdmin = require("../middlewares/admin.middleware");
 const asyncHandler = require('../utils/async.handler');
 
 const roleRepository = new RoleMongoRepository();
@@ -83,7 +85,10 @@ router.get('/:id', asyncHandler(roleController.getById));
  *       409:
  *         description: Role already exists
  */
-router.post('/', asyncHandler(roleController.create));
+router.post('/',
+    [authenticateToken, isAdmin],
+    asyncHandler(roleController.create)
+);
 
 /**
  * @swagger
@@ -113,7 +118,10 @@ router.post('/', asyncHandler(roleController.create));
  *       404:
  *         description: Role not found
  */
-router.put('/:id', asyncHandler(roleController.update));
+router.put('/:id',
+    [authenticateToken, isAdmin],
+    asyncHandler(roleController.update)
+);
 
 
 /**
@@ -134,6 +142,9 @@ router.put('/:id', asyncHandler(roleController.update));
  *       404:
  *         description: Role not found
  */
-router.delete('/:id', asyncHandler(roleController.delete));
+router.delete('/:id',
+    [authenticateToken, isAdmin],
+    asyncHandler(roleController.delete)
+);
 
 module.exports = router;
